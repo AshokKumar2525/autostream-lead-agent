@@ -281,7 +281,7 @@ autostream-lead-agent/
 
 | Component | Technology |
 |-----------|-----------|
-| LLM | Google Gemini 1.5 Flash |
+| LLM | Google Gemini 3.0 Flash |
 | Agent Framework | LangGraph |
 | RAG Embeddings | HuggingFace `all-MiniLM-L6-v2` |
 | Vector Store | FAISS |
