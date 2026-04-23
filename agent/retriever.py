@@ -7,13 +7,17 @@ and stores in a FAISS vector store for retrieval.
 """
 
 import os
+import sys
+import io
 import warnings
 import logging
+import contextlib
 
 # ── Suppress ALL warnings from HuggingFace / transformers / safetensors ──
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["TRANSFORMERS_VERBOSITY"] = "error"
 os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
+os.environ["HF_HUB_DISABLE_IMPLICIT_TOKEN"] = "1"
 warnings.filterwarnings("ignore")
 logging.getLogger("transformers").setLevel(logging.ERROR)
 logging.getLogger("sentence_transformers").setLevel(logging.ERROR)
@@ -60,9 +64,12 @@ def build_retriever():
     chunks = text_splitter.split_documents(documents)
 
     # Create embeddings using a lightweight sentence-transformer model
-    embeddings = HuggingFaceEmbeddings(
-        model_name="all-MiniLM-L6-v2"
-    )
+    # Redirect stderr to suppress HuggingFace/safetensors console warnings
+    with warnings.catch_warnings(), contextlib.redirect_stderr(io.StringIO()):
+        warnings.simplefilter("ignore")
+        embeddings = HuggingFaceEmbeddings(
+            model_name="all-MiniLM-L6-v2"
+        )
 
     # Build the FAISS vector store from document chunks
     vectorstore = FAISS.from_documents(chunks, embeddings)
